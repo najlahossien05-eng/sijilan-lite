@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0e12" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="حاسبة سِجلان" />
+  <title>حاسبة سِجلان</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" href="icon-192.png" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Changa:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0b0e12;
+      --card: #141a21;
+      --card-2: #1a222b;
+      --input: #0f141a;
+      --border: rgba(255, 255, 255, 0.07);
+      --text: #f8fafc;
+      --muted: #9aa6b5;
+      --primary: #e11d2e;
+      --blue: #3b82f6;
+      --green: #10b981;
+      --purple: #8b5cf6;
+      --pink: #ec4899;
+      --amber: #f59e0b;
+      --indigo: #6366f1;
+      --radius: 20px;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f4f6f9;
+        --card: #ffffff;
+        --card-2: #f1f4f8;
+        --input: #f6f8fb;
+        --border: #e2e8f0;
+        --text: #0f172a;
+        --muted: #64748b;
+      }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html, body { background: var(--bg); color: var(--text); }
+    body {
+      font-family: 'Changa', system-ui, -apple-system, 'Segoe UI', Tahoma, sans-serif;
+      font-variant-numeric: tabular-nums;
+      min-height: 100dvh;
+      padding-bottom: calc(80px + env(safe-area-inset-bottom));
+    }
+    button, input { font: inherit; color: inherit; }
+    [hidden] { display: none !important; }
+    button { cursor: pointer; border: 0; background: none; }
+    .app { max-width: 480px; margin: 0 auto; padding: 16px 16px 24px; }
+
+    header.top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    header.top h1 { font-size: 22px; font-weight: 800; }
+    header.top p { font-size: 13px; color: var(--muted); font-weight: 600; }
+
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+    .stack > * + * { margin-top: 12px; }
+    .section-title { font-size: 13px; color: var(--muted); font-weight: 700; margin: 20px 4px 8px; }
+
+    label.field { display: block; }
+    label.field span { display: block; font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 6px; }
+    .input {
+      width: 100%; height: 54px; border-radius: 14px; border: 1px solid var(--border);
+      background: var(--input); padding: 0 14px; font-size: 20px; font-weight: 800;
+      direction: ltr; text-align: left; outline: none; transition: border-color .15s;
+    }
+    .input:focus { border-color: var(--primary); }
+    .input.small { height: 46px; font-size: 16px; }
+    .input.text { direction: rtl; text-align: right; font-size: 15px; font-weight: 600; }
+    .hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+    .toggle {
+      width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 12px 14px; border-radius: 14px; border: 1px solid var(--border); background: var(--input); text-align: right;
+    }
+    .toggle strong { display: block; font-size: 15px; }
+    .toggle small { display: block; font-size: 12px; color: var(--muted); font-weight: 600; }
+    .switch { width: 44px; height: 26px; border-radius: 99px; background: #64748b55; position: relative; flex-shrink: 0; transition: background .15s; }
+    .switch::after { content: ''; position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: right .15s; }
+    .toggle[aria-checked="true"] { border-color: var(--pink); }
+    .toggle[aria-checked="true"] .switch { background: var(--pink); }
+    .toggle[aria-checked="true"] .switch::after { right: 21px; }
+
+    .hero { background: var(--primary); color: #fff; border-radius: var(--radius); padding: 18px; }
+    .hero .label { font-size: 13px; font-weight: 700; opacity: .9; }
+    .hero .value { font-size: 34px; font-weight: 800; margin-top: 4px; }
+    .hero .value small, .money small { font-size: 13px; font-weight: 600; opacity: .75; }
+    .hero .sub { font-size: 13px; font-weight: 600; opacity: .9; margin-top: 4px; }
+
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .tile { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 12px 14px; }
+    .tile .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-left: 6px; }
+    .tile .t { font-size: 12px; color: var(--muted); font-weight: 700; }
+    .tile .money { font-size: 19px; font-weight: 800; margin-top: 4px; }
+
+    /* Step-by-step breakdown */
+    .steps { list-style: none; }
+    .step { position: relative; padding: 0 22px 14px 0; }
+    .step::before { content: ''; position: absolute; right: 5px; top: 8px; bottom: -6px; width: 2px; background: var(--border); }
+    .step:last-child::before { display: none; }
+    .step::after { content: ''; position: absolute; right: 0; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--c, var(--muted)); }
+    .step h3 { font-size: 14px; font-weight: 800; }
+    .row { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; padding: 3px 0; }
+    .row span:first-child { color: var(--muted); font-weight: 600; }
+    .row span:last-child { font-weight: 800; white-space: nowrap; }
+    .row.total { border-top: 1px dashed var(--border); margin-top: 4px; padding-top: 6px; }
+    .neg { color: var(--primary); }
+    .pos { color: var(--green); }
+
+    .btn { height: 52px; border-radius: 14px; font-weight: 800; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 16px; transition: transform .1s, opacity .15s; }
+    .btn:active { transform: scale(.98); }
+    .btn.primary { background: var(--primary); color: #fff; }
+    .btn.green { background: var(--green); color: #fff; }
+    .btn.ghost { background: var(--card-2); border: 1px solid var(--border); }
+    .btn.danger { color: var(--primary); background: transparent; border: 1px solid color-mix(in srgb, var(--primary) 40%, transparent); }
+    .btn.block { width: 100%; }
+    .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .btn-row3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .btn-row3 .btn { height: 46px; font-size: 13px; padding: 0 8px; }
+    .btn:disabled { opacity: .6; }
+
+    .alert { border-radius: 14px; padding: 10px 12px; font-size: 13px; font-weight: 600; background: color-mix(in srgb, var(--amber) 15%, transparent); color: var(--amber); }
+
+    .chips { display: flex; gap: 8px; margin-bottom: 10px; }
+    .chip { height: 36px; padding: 0 14px; border-radius: 99px; font-size: 13px; font-weight: 700; background: var(--card); border: 1px solid var(--border); color: var(--muted); }
+    .chip[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+    /* Collapsible card */
+    .fold { padding: 0; }
+    .fold > summary {
+      list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 14px 16px; font-size: 15px; font-weight: 800; cursor: pointer; user-select: none;
+    }
+    .fold > summary::-webkit-details-marker { display: none; }
+    .fold > summary .chev { width: 20px; height: 20px; color: var(--muted); transition: transform .2s; }
+    .fold[open] > summary .chev { transform: rotate(180deg); }
+    .fold > summary:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; border-radius: var(--radius); }
+    .fold > .steps { padding: 4px 16px 6px; border-top: 1px solid var(--border); padding-top: 14px; animation: fade .18s ease-out; }
+
+    /* Accumulated summary */
+    .sum { margin-top: 10px; }
+    .sum > * + * { margin-top: 10px; }
+    .amt { font-weight: 800; white-space: nowrap; font-size: 15px; }
+    .amt small { font-size: 11px; font-weight: 600; color: var(--muted); }
+    .amt.strong { font-size: 17px; }
+    .sum-net { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 12px 14px; border-top: 3px solid var(--c); }
+    .sum-net > span:first-child { display: block; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px; }
+    .sum-net .amt { font-size: 19px; }
+    .sum-card { padding: 14px 16px; }
+    .sum-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+    .sum-head h3 { font-size: 14px; font-weight: 800; }
+    .sum-line { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 7px 0; }
+    .sum-line + .sum-line { border-top: 1px solid var(--border); }
+    .sum-label { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: var(--muted); min-width: 0; }
+    .sum-label i { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .sum-sub { margin: 2px 0; padding: 2px 12px; border-right: 2px solid var(--border); background: var(--card-2); border-radius: 12px; }
+    .sum-sub .sum-line { padding: 6px 0; }
+    .sum-sub .sum-label { font-size: 13px; }
+    .sum-sub .amt { font-size: 14px; }
+    .split { display: flex; height: 8px; border-radius: 99px; overflow: hidden; background: var(--card-2); margin-bottom: 6px; gap: 2px; }
+    .split span { display: block; height: 100%; }
+
+    /* Calculator button inside amount fields */
+    .input-wrap { position: relative; }
+    .input-wrap .input { padding-left: 58px; }
+    .calc-btn {
+      position: absolute; left: 6px; top: 50%; transform: translateY(-50%);
+      width: 44px; height: 42px; border-radius: 11px; background: var(--card-2); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center; color: var(--muted);
+    }
+    .calc-btn:hover, .calc-btn:focus-visible { color: var(--primary); border-color: var(--primary); outline: none; }
+    .calc-btn svg { width: 20px; height: 20px; }
+
+    /* Summing calculator sheet */
+    .sheet-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 30; opacity: 0; pointer-events: none; transition: opacity .2s; }
+    .sheet {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 31; max-width: 480px; margin: 0 auto;
+      background: var(--card); border: 1px solid var(--border); border-bottom: 0; border-radius: 24px 24px 0 0;
+      padding: 14px 14px calc(14px + env(safe-area-inset-bottom));
+      transform: translateY(105%); transition: transform .22s ease-out;
+    }
+    .sheet-open .sheet-backdrop { opacity: 1; pointer-events: auto; }
+    .sheet-open .sheet { transform: none; }
+    .sheet-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .sheet-head h2 { font-size: 16px; font-weight: 800; }
+    .sheet-head button { width: 36px; height: 36px; border-radius: 10px; color: var(--muted); font-size: 20px; }
+    .calc-screen { background: var(--input); border: 1px solid var(--border); border-radius: 16px; padding: 10px 12px; }
+    .calc-items { display: flex; flex-wrap: wrap; gap: 6px; min-height: 30px; direction: ltr; justify-content: flex-end; }
+    .calc-item { display: inline-flex; align-items: center; gap: 4px; height: 28px; padding: 0 4px 0 10px; border-radius: 99px; background: var(--card-2); border: 1px solid var(--border); font-size: 13px; font-weight: 700; }
+    .calc-item.neg { color: var(--primary); }
+    .calc-item button { width: 22px; height: 22px; border-radius: 50%; color: var(--muted); font-size: 14px; line-height: 1; }
+    .calc-items .empty-hint { color: var(--muted); font-size: 13px; font-weight: 600; direction: rtl; }
+    .calc-current { direction: ltr; text-align: left; font-size: 26px; font-weight: 800; min-height: 36px; margin-top: 6px; word-break: break-all; }
+    .calc-total { display: flex; justify-content: space-between; align-items: baseline; margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--border); font-size: 14px; color: var(--muted); font-weight: 700; }
+    .calc-total strong { color: var(--text); font-size: 18px; }
+    .keypad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; direction: ltr; }
+    .keypad button { height: 54px; border-radius: 14px; background: var(--card-2); border: 1px solid var(--border); font-size: 22px; font-weight: 800; }
+    .keypad button:active { transform: scale(.96); }
+    .keypad .op-key { color: var(--primary); }
+    .keypad .add-key { background: var(--indigo); color: #fff; border-color: transparent; font-size: 16px; }
+    .keypad .done-key { grid-column: span 2; background: var(--green); color: #fff; border-color: transparent; font-size: 16px; }
+
+    .op { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 12px 14px; }
+    .op + .op { margin-top: 10px; }
+    .op-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; width: 100%; text-align: right; }
+    .op-head .when { font-size: 12px; color: var(--muted); font-weight: 600; }
+    .op-head .note { font-size: 14px; font-weight: 700; }
+    .op-head .money { font-size: 17px; font-weight: 800; white-space: nowrap; }
+    .op-body { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+    .op-actions { display: flex; gap: 8px; margin-top: 10px; }
+    .op-actions .btn { height: 40px; font-size: 13px; flex: 1; }
+    .empty { text-align: center; color: var(--muted); font-weight: 600; padding: 32px 12px; font-size: 14px; }
+
+    nav.tabs {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 10;
+      background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(10px);
+      border-top: 1px solid var(--border); padding-bottom: env(safe-area-inset-bottom);
+    }
+    nav.tabs .inner { max-width: 480px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); height: 64px; }
+    nav.tabs button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: var(--muted); font-size: 12px; font-weight: 700; }
+    nav.tabs button svg { width: 22px; height: 22px; }
+    nav.tabs button[aria-current="page"] { color: var(--primary); }
+
+    .view { display: none; animation: fade .18s ease-out; }
+    .view.active { display: block; }
+    @keyframes fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+    .toast {
+      position: fixed; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(20px);
+      background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-size: 14px; font-weight: 700;
+      opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 20; max-width: 90vw; text-align: center;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+  <div class="app">
+
+    <!-- ============ Main calculator ============ -->
+    <section class="view active" id="view-calc" aria-label="الحاسبة الرئيسية">
+      <header class="top">
+        <div>
+          <p>حساب وتوزيع الحصص</p>
+          <h1>الحاسبة الرئيسية</h1>
+        </div>
+      </header>
+
+      <div class="card stack">
+        <label class="field">
+          <span id="lbl-a">مبلغ عبدالعالم</span>
+          <div class="input-wrap"><input class="input" id="in-a" inputmode="decimal" autocomplete="off" placeholder="0" /><button type="button" class="calc-btn" data-calc-for="in-a" aria-label="فتح حاسبة الجمع"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="11" x2="8" y2="11"/><line x1="12" y1="11" x2="12" y2="11"/><line x1="16" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="8" y2="15"/><line x1="12" y1="15" x2="12" y2="15"/><line x1="16" y1="15" x2="16" y2="18"/><line x1="8" y1="18" x2="12" y2="18"/></svg></button></div>
+        </label>
+        <label class="field">
+          <span id="lbl-b">مبلغ الإخوة</span>
+          <div class="input-wrap"><input class="input" id="in-b" inputmode="decimal" autocomplete="off" placeholder="0" /><button type="button" class="calc-btn" data-calc-for="in-b" aria-label="فتح حاسبة الجمع"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="11" x2="8" y2="11"/><line x1="12" y1="11" x2="12" y2="11"/><line x1="16" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="8" y2="15"/><line x1="12" y1="15" x2="12" y2="15"/><line x1="16" y1="15" x2="16" y2="18"/><line x1="8" y1="18" x2="12" y2="18"/></svg></button></div>
+          <p class="hint">لجمع عدة مبالغ اضغط زر الحاسبة، أو اكتب + بينها.</p>
+        </label>
+        <button class="toggle" id="tg-c" role="switch" aria-checked="false" type="button">
+          <span>
+            <strong id="lbl-c">حصة مريم</strong>
+            <small id="lbl-c-sub">تُخصم من صندوق النسب</small>
+          </span>
+          <span class="switch" aria-hidden="true"></span>
+        </button>
+        <label class="field">
+          <span>ملاحظة على العملية (اختياري)</span>
+          <input class="input small text" id="in-note" autocomplete="off" placeholder="مثال: تحويلات الأسبوع الأول" />
+        </label>
+      </div>
+
+      <div class="hero" style="margin-top:12px">
+        <div class="label">المبلغ المستحق للتحويل</div>
+        <div class="value" id="out-transfer">0 <small>ريال</small></div>
+        <div class="sub" id="out-transfer-sub">صافي عبدالعالم + صافي الإخوة</div>
+      </div>
+
+      <div class="grid2" style="margin-top:10px">
+        <div class="tile"><div class="t"><span class="dot" style="background:var(--blue)"></span><span id="t-a">صافي عبدالعالم</span></div><div class="money" id="out-a">0</div></div>
+        <div class="tile"><div class="t"><span class="dot" style="background:var(--green)"></span><span id="t-b">صافي الإخوة</span></div><div class="money" id="out-b">0</div></div>
+        <div class="tile"><div class="t"><span class="dot" style="background:var(--purple)"></span><span id="t-d">حصة عاصم</span></div><div class="money" id="out-asim">0</div></div>
+        <div class="tile"><div class="t"><span class="dot" style="background:var(--pink)"></span><span id="t-c">حصة مريم</span></div><div class="money" id="out-c">0</div></div>
+      </div>
+
+      <div id="calc-alert" class="alert" style="margin-top:10px" hidden></div>
+
+      <details class="card fold" id="calc-fold" style="margin-top:12px">
+        <summary>
+          <span>تسلسل العملية بالتفصيل</span>
+          <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+        </summary>
+        <ol class="steps" id="calc-steps"></ol>
+      </details>
+
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn green" id="btn-save" type="button">حفظ العملية</button>
+        <button class="btn ghost" id="btn-copy" type="button">نسخ التقرير</button>
+      </div>
+      <div class="btn-row3" style="margin-top:10px">
+        <button class="btn ghost" id="btn-copy-steps" type="button">نسخ التسلسل</button>
+        <button class="btn ghost" id="btn-pdf" type="button">تحميل PDF</button>
+        <button class="btn ghost" id="btn-share" type="button">مشاركة</button>
+      </div>
+      <button class="btn ghost block" id="btn-clear" type="button" style="margin-top:10px">مسح الحقول</button>
+    </section>
+
+    <!-- ============ Individual calculator ============ -->
+    <section class="view" id="view-ind" aria-label="حاسبة الأفراد">
+      <header class="top">
+        <div>
+          <p>حساب سريع لمبلغ فرد واحد</p>
+          <h1>حاسبة الأفراد</h1>
+        </div>
+      </header>
+      <div class="card stack">
+        <label class="field">
+          <span>المبلغ</span>
+          <div class="input-wrap"><input class="input" id="in-ind" inputmode="decimal" autocomplete="off" placeholder="0" /><button type="button" class="calc-btn" data-calc-for="in-ind" aria-label="فتح حاسبة الجمع"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="11" x2="8" y2="11"/><line x1="12" y1="11" x2="12" y2="11"/><line x1="16" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="8" y2="15"/><line x1="12" y1="15" x2="12" y2="15"/><line x1="16" y1="15" x2="16" y2="18"/><line x1="8" y1="18" x2="12" y2="18"/></svg></button></div>
+          <p class="hint">لجمع عدة مبالغ اضغط زر الحاسبة، أو اكتب + بينها.</p>
+        </label>
+      </div>
+      <div class="hero" style="margin-top:12px">
+        <div class="label">الصافي بعد الخصم والعمولة</div>
+        <div class="value" id="out-ind">0 <small>ريال</small></div>
+      </div>
+      <h2 class="section-title">التفصيل</h2>
+      <div class="card"><ol class="steps" id="ind-steps"></ol></div>
+      <button class="btn ghost block" id="btn-copy-ind" type="button" style="margin-top:12px">نسخ التقرير</button>
+    </section>
+
+    <!-- ============ Saved operations ============ -->
+    <section class="view" id="view-log" aria-label="العمليات المحفوظة">
+      <header class="top">
+        <div>
+          <p>كل عملية حفظتها من الحاسبة الرئيسية</p>
+          <h1>العمليات المحفوظة</h1>
+        </div>
+      </header>
+
+      <div class="chips" role="group" aria-label="الفترة">
+        <button class="chip" data-period="month" aria-pressed="true" type="button">هذا الشهر</button>
+        <button class="chip" data-period="all" aria-pressed="false" type="button">الكل</button>
+      </div>
+
+      <div class="hero">
+        <div class="label">المجموع المتراكم للتحويل</div>
+        <div class="value" id="sum-transfer">0 <small>ريال</small></div>
+        <div class="sub" id="sum-count">0 عملية</div>
+      </div>
+      <div id="sum-rows" class="sum"></div>
+
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn ghost" id="btn-copy-sum" type="button">نسخ التقرير المجمّع</button>
+        <button class="btn ghost" id="btn-export" type="button">نسخة احتياطية</button>
+      </div>
+
+      <h2 class="section-title">العمليات</h2>
+      <div id="ops-list"></div>
+    </section>
+
+    <!-- ============ Settings ============ -->
+    <section class="view" id="view-set" aria-label="الإعدادات">
+      <header class="top">
+        <div>
+          <p>تُحفظ على هذا الجهاز فقط</p>
+          <h1>النسب والأسماء</h1>
+        </div>
+      </header>
+      <div class="card stack">
+        <label class="field"><span>اسم الطرف الأول</span><input class="input small text" id="s-nameA" /></label>
+        <label class="field"><span>اسم الطرف الثاني</span><input class="input small text" id="s-nameB" /></label>
+        <label class="field"><span>اسم صاحبة الحصة الثابتة</span><input class="input small text" id="s-nameC" /></label>
+        <label class="field"><span>اسم شريك نصف الصندوق</span><input class="input small text" id="s-nameD" /></label>
+      </div>
+      <div class="card stack" style="margin-top:12px">
+        <label class="field"><span id="s-lbl-a">نسبة استقطاع الطرف الأول (%)</span><input class="input small" id="s-pctA" inputmode="decimal" /></label>
+        <label class="field"><span id="s-lbl-b">نسبة استقطاع الطرف الثاني (%)</span><input class="input small" id="s-pctB" inputmode="decimal" /></label>
+        <label class="field"><span>العمولة البنكية (%)</span><input class="input small" id="s-comm" inputmode="decimal" /></label>
+        <label class="field"><span id="s-lbl-c">الحصة الثابتة (ريال)</span><input class="input small" id="s-amountC" inputmode="decimal" /></label>
+      </div>
+      <p class="hint" style="margin:8px 4px 0">تُحفظ النسب مع كل عملية، فتغييرها لا يغيّر العمليات المحفوظة سابقًا.</p>
+
+      <h2 class="section-title">خط تقرير PDF</h2>
+      <div class="card stack">
+        <div class="row"><span>الخط المستخدم الآن</span><span id="font-name">...</span></div>
+        <button class="btn ghost block" id="btn-font" type="button">اختيار خط Sakkal Majalla من جهازك</button>
+        <input type="file" id="file-font" accept=".ttf,font/ttf" multiple hidden />
+        <button class="btn danger block" id="btn-font-reset" type="button" hidden>الرجوع للخط الافتراضي</button>
+        <p class="hint">اختر الملفين <bdi dir="ltr">majalla.ttf</bdi> و <bdi dir="ltr">majallab.ttf</bdi> (العريض) معًا. في ويندوز تجدهما في مجلد <bdi dir="ltr">C:\Windows\Fonts</bdi>؛ انسخهما أولًا إلى سطح المكتب ثم اخترهما. يُحفظ الخط على هذا الجهاز فقط.</p>
+      </div>
+
+      <h2 class="section-title">البيانات</h2>
+      <div class="card stack">
+        <button class="btn ghost block" id="btn-export-2" type="button">تنزيل نسخة احتياطية</button>
+        <button class="btn ghost block" id="btn-import" type="button">استعادة من نسخة احتياطية</button>
+        <input type="file" id="file-import" accept="application/json,.json" hidden />
+        <button class="btn danger block" id="btn-wipe" type="button">حذف كل العمليات المحفوظة</button>
+      </div>
+    </section>
+  </div>
+
+  <nav class="tabs" aria-label="التنقل">
+    <div class="inner">
+      <button type="button" data-view="view-calc" aria-current="page">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="11" x2="8" y2="11"/><line x1="12" y1="11" x2="12" y2="11"/><line x1="16" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="8" y2="15"/><line x1="12" y1="15" x2="12" y2="15"/><line x1="16" y1="15" x2="16" y2="18"/><line x1="8" y1="18" x2="12" y2="18"/></svg>
+        الحاسبة
+      </button>
+      <button type="button" data-view="view-ind">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
+        الأفراد
+      </button>
+      <button type="button" data-view="view-log">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
+        المحفوظة
+      </button>
+      <button type="button" data-view="view-set">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        الإعدادات
+      </button>
+    </div>
+  </nav>
+
+  <!-- Summing calculator (opened from the button inside an amount field) -->
+  <div id="calc-sheet-root">
+    <div class="sheet-backdrop" id="calc-backdrop"></div>
+    <div class="sheet" id="calc-sheet" role="dialog" aria-modal="true" aria-labelledby="calc-title" aria-hidden="true">
+      <div class="sheet-head">
+        <h2 id="calc-title">جمع المبالغ</h2>
+        <button type="button" id="calc-close" aria-label="إغلاق">✕</button>
+      </div>
+      <div class="calc-screen">
+        <div class="calc-items" id="calc-items"></div>
+        <div class="calc-current" id="calc-current" aria-live="polite">0</div>
+        <div class="calc-total"><span>المجموع</span><strong id="calc-total">0</strong></div>
+      </div>
+      <div class="keypad" id="calc-keypad">
+        <button type="button" data-k="7">7</button>
+        <button type="button" data-k="8">8</button>
+        <button type="button" data-k="9">9</button>
+        <button type="button" data-k="back" class="op-key" aria-label="مسح رقم">⌫</button>
+        <button type="button" data-k="4">4</button>
+        <button type="button" data-k="5">5</button>
+        <button type="button" data-k="6">6</button>
+        <button type="button" data-k="minus" class="op-key" aria-label="طرح المبلغ">−</button>
+        <button type="button" data-k="1">1</button>
+        <button type="button" data-k="2">2</button>
+        <button type="button" data-k="3">3</button>
+        <button type="button" data-k="plus" class="add-key" aria-label="إضافة المبلغ">+ إضافة</button>
+        <button type="button" data-k="clear" class="op-key" aria-label="مسح الكل">C</button>
+        <button type="button" data-k="0">0</button>
+        <button type="button" data-k=".">.</button>
+        <button type="button" data-k="000">000</button>
+        <button type="button" data-k="done" class="done-key" style="grid-column: span 4">اعتماد المجموع</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="vendor/jspdf.umd.min.js"></script>
+  <script src="calc.js"></script>
+  <script src="pdf.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

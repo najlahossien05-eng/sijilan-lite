@@ -1,0 +1,10 @@
+# Microsoft fonts may not be redistributed; pick them in the app's settings instead.
+fonts/majalla*.ttf
+fonts/*Majalla*
+
+# Backups downloaded from the app contain personal financial data.
+sijilan-lite-*.json
+
+node_modules/
+.DS_Store
+Thumbs.db
